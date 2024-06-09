@@ -101,6 +101,10 @@ refrigerator_port:
 thermostat_port:
 	@$(MAKE) -C $(MATTER_BUILDDIR) thermostat_port
 
+.PHONY: my_dimmable_light
+my_dimmable_light:
+	@$(MAKE) -C $(MATTER_BUILDDIR) my_dimmable_light
+
 .PHONY: clean_matter
 clean_matter:
 	@$(MAKE) -f application.is.matter.mk clean

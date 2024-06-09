@@ -59,6 +59,8 @@ REFRIGERATOR_FILE	= $(MATTER_MAKEDIR)/refrigerator/build/chip/codegen/cluster-fi
 REFRIGERATOR_ZAP	= $(MATTER_EXAMPLEDIR)/refrigerator/refrigerator-app.zap
 THERMOSTAT_FILE		= $(CHIPDIR)/examples/thermostat/ameba/build/chip/codegen/cluster-file.txt
 THERMOSTAT_ZAP		= $(CHIPDIR)/examples/thermostat/thermostat-common/thermostat.zap
+MY_DIMMABLE_LIGHT_FILE = $(MATTER_MAKEDIR)/my_dimmable_light/build/chip/codegen/cluster-file.txt
+MY_DIMMABLE_LIGHT_ZAP = $(MATTER_EXAMPLEDIR)/my_dimmable_light/my_dimmable_light-app.zap
 
 #*****************************************************************************#
 #                      RULES TO MAKE MATTER DIRS                              #
@@ -170,6 +172,14 @@ $(THERMOSTAT_FILE): $(THERMOSTAT_ZAP)
 	@python3 $(CHIPDIR)/src/app/zap_cluster_list.py --zap_file $^ > $(CHIPDIR)/examples/thermostat/ameba/build/chip/codegen/cluster-file.txt
 	@python3 $(MATTER_TOOLDIR)/codegen_helpers/parse_clusters.py --cluster_file $@ --chip_path $(CHIPDIR)
 
+$(MY_DIMMABLE_LIGHT_FILE): $(MY_DIMMABLE_LIGHT_ZAP)
+	@mkdir -p $(MATTER_MAKEDIR)/my_dimmable_light/build/chip/codegen/zap-generated
+	@python3 $(CHIPDIR)/scripts/tools/zap/generate.py --no-prettify-output --templates src/app/zap-templates/matter-idl-server.json -z $(CHIPDIR)/src/app/zap-templates/zcl/zcl.json --output-dir $(MATTER_MAKEDIR)/my_dimmable_light/build/chip/codegen/zap-generated  $^
+	@python3 $(CHIPDIR)/scripts/tools/zap/generate.py --no-prettify-output --templates src/app/zap-templates/app-templates.json -z $(CHIPDIR)/src/app/zap-templates/zcl/zcl.json --output-dir $(MATTER_MAKEDIR)/my_dimmable_light/build/chip/codegen/zap-generated $^
+	@python3 $(CHIPDIR)/scripts/codegen.py --generator cpp-app --output-dir $(MATTER_MAKEDIR)/my_dimmable_light/build/chip/codegen --expected-outputs $(MATTER_TOOLDIR)/codegen_helpers/expected.outputs $(MATTER_EXAMPLEDIR)/my_dimmable_light/my_dimmable_light-app.matter
+	@python3 $(CHIPDIR)/src/app/zap_cluster_list.py --zap_file $^ > $@
+	@python3 $(MATTER_TOOLDIR)/codegen_helpers/parse_clusters.py --cluster_file $@ --chip_path $(CHIPDIR)
+
 copy_gen_files_light_dm:
 	@cp $(MATTER_EXAMPLEDIR)/light_dm/endpoint_config.h $(CHIPDIR)/examples/lighting-app/ameba/build/chip/codegen/zap-generated
 	@cp $(MATTER_EXAMPLEDIR)/light_dm/gen_config.h $(CHIPDIR)/examples/lighting-app/ameba/build/chip/codegen/zap-generated
@@ -252,6 +262,11 @@ chef: toolchain_matter $(CHEF_FILE)
 	$(MAKE) -f $(MATTER_MAKEDIR)/chef/lib_chip_chef_core.mk all
 	$(MAKE) -f $(MATTER_MAKEDIR)/chef/lib_chip_chef_main.mk all
 
+.PHONY: my_dimmable_light
+my_dimmable_light: toolchain_matter $(MY_DIMMABLE_LIGHT_FILE)
+	$(MAKE) -f $(MATTER_MAKEDIR)/my_dimmable_light/lib_chip_my_dimmable_light_core.mk all
+	$(MAKE) -f $(MATTER_MAKEDIR)/my_dimmable_light/lib_chip_my_dimmable_light_main.mk all
+
 .PHONY: clean_matter_libs
 clean_matter_libs:
 	@$(MAKE) -f $(MATTER_MAKEDIR)/all_clusters/lib_chip_main.mk clean
@@ -285,3 +300,5 @@ clean_matter_libs:
 	@$(MAKE) -f $(MATTER_MAKEDIR)/refrigerator/lib_chip_refrigerator_core.mk clean
 	@$(MAKE) -f $(MATTER_MAKEDIR)/thermostat/lib_chip_thermostat_core.mk clean
 	@$(MAKE) -f $(MATTER_MAKEDIR)/thermostat/lib_chip_thermostat_core.mk clean
+	@$(MAKE) -f $(MATTER_MAKEDIR)/my_dimmable_light/lib_chip_my_dimmable_light_main.mk clean
+	@$(MAKE) -f $(MATTER_MAKEDIR)/my_dimmable_light/lib_chip_my_dimmable_light_core.mk clean

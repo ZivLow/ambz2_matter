@@ -2,12 +2,16 @@
 #include <support/logging/CHIPLogging.h>
 #include <algorithm>
 
+#define PWM_PERIOD      500
+
 // normal LED
 void MatterLED::Init(PinName pin)
 {
     mPwm_obj                        = (pwmout_t*) pvPortMalloc(sizeof(pwmout_t));
 
     pwmout_init(mPwm_obj, pin);
+    pwmout_period_us(mPwm_obj, PWM_PERIOD);
+    pwmout_start(mPwm_obj);
 
     mRgb                            = false;
     mState                          = false;
@@ -91,13 +95,15 @@ void MatterLED::Set(bool state)
         return;
 
     mState = state;
-    // DoSet will be done during levelcontrol change
+    
+    DoSet();
 }
 
 void MatterLED::Toggle()
 {
     mState = !mState;
-    // DoSet will be done during levelcontrol change
+    
+    DoSet();
 }
 
 void MatterLED::SetBrightness(uint8_t brightness)
