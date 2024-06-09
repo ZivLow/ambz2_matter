@@ -124,6 +124,9 @@ void pwmout_pulsewidth_ms(pwmout_t* obj, int ms);
   */
 void pwmout_pulsewidth_us(pwmout_t* obj, int us);
 
+void pwmout_start(pwmout_t *obj);
+void pwmout_stop(pwmout_t *obj);
+
 ///@}
 
 /*\@}*/
